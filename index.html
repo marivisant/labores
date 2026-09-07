@@ -185,6 +185,7 @@ nav.abajo button.on{color:var(--granate);font-weight:600}
 .vacio{text-align:center;padding:44px 24px;color:var(--tinta-suave)}
 .vacio b{display:block;font-family:var(--serif);font-size:21px;color:var(--tinta);margin-bottom:6px}
 .aviso{background:#F6EFE4;border-radius:14px;padding:12px 14px;font-size:15px;color:#6B5836;display:flex;gap:9px;align-items:flex-start;margin-top:14px}
+.aviso[hidden]{display:none}
 .opcion{display:flex;gap:13px;align-items:center;width:100%;background:var(--blanco);border-radius:var(--radio);padding:14px;margin-bottom:10px;box-shadow:var(--sombra);text-align:left}
 .opcion .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--rosa-claro);font-size:19px;flex:none}
 .opcion b{display:block;font-size:17px;font-weight:600}
@@ -537,7 +538,8 @@ function pintarInicio(){
   document.getElementById('r-anio').textContent = labores.filter(l=>String(l.anio)===String(anio)).length;
   document.getElementById('r-personas').textContent = new Set(labores.map(l=>l.persona).filter(Boolean)).size;
   const dias = config.ultimaCopia ? (Date.now()-config.ultimaCopia)/86400000 : 999;
-  document.getElementById('aviso-copia').hidden = !(labores.length>=3 && dias>45);
+  const diasDeUso = labores.length ? (Date.now()-Math.min(...labores.map(l=>l.creada||Date.now())))/86400000 : 0;
+  document.getElementById('aviso-copia').hidden = !(labores.length>=5 && diasDeUso>7 && dias>45);
 }
 
 /* ---------- lista de labores ---------- */
