@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Las labores de Mariví</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FBF3F1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Labores">
+<link rel="apple-touch-icon" href="icono-180.png">
+<style>
+:root{
+  --granate:#A6384F;
+  --granate-osc:#7E2639;
+  --rosa:#E7A3B0;
+  --rosa-claro:#F8E7EA;
+  --crema:#FBF3F1;
+  --verde:#4F8A5B;
+  --whatsapp:#25A34B;
+  --azul:#5F8FAE;
+  --arena:#CDB69B;
+  --tinta:#3B2A2E;
+  --tinta-suave:#7A666A;
+  --linea:#EEDDE0;
+  --blanco:#FFFFFF;
+  --radio:18px;
+  --sombra:0 2px 10px rgba(122,72,84,.10);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{margin:0;padding:0;background:#EDE2E0}
+body{
+  margin:0 auto;padding:0;
+  max-width:460px;
+  min-height:100vh;
+  box-shadow:0 0 30px rgba(122,72,84,.10);
+  background:var(--crema);
+  color:var(--tinta);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.45;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+button,input,select,textarea{font-family:inherit;font-size:17px;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:var(--granate)}
+
+/* ---------- patrón patchwork ---------- */
+.quilt{
+  background-color:var(--rosa-claro);
+  background-image:
+    linear-gradient(45deg,rgba(166,56,79,.14) 25%,transparent 25%,transparent 75%,rgba(166,56,79,.14) 75%),
+    linear-gradient(45deg,rgba(166,56,79,.14) 25%,transparent 25%,transparent 75%,rgba(166,56,79,.14) 75%);
+  background-size:26px 26px;
+  background-position:0 0,13px 13px;
+}
+
+/* ---------- cabeceras ---------- */
+.barra{
+  position:sticky;top:0;z-index:20;
+  background:rgba(251,243,241,.94);
+  backdrop-filter:saturate(160%) blur(10px);
+  border-bottom:1px solid var(--linea);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  display:flex;align-items:center;gap:10px;min-height:56px;
+}
+.barra h2{font-size:22px;flex:1;text-align:center}
+.barra .lado{min-width:74px;font-size:16px;color:var(--granate);display:flex;align-items:center;gap:4px}
+.barra .lado.der{justify-content:flex-end}
+.sub{display:block;font-size:13px;color:var(--tinta-suave);font-family:var(--sans);font-weight:400}
+
+/* ---------- pantallas ---------- */
+.pantalla{display:none;animation:entra .18s ease-out}
+.pantalla.activa{display:block}
+@keyframes entra{from{opacity:.4}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.pantalla{animation:none}}
+.cuerpo{padding:16px}
+
+/* ---------- portada ---------- */
+.portada{padding:26px 22px 20px;text-align:center;border-bottom:1px solid var(--linea)}
+.portada h1{font-size:34px;line-height:1.15;letter-spacing:.2px}
+.portada p{margin:8px 0 0;color:var(--tinta-suave);font-family:var(--serif);font-style:italic;font-size:17px}
+.corazon{width:104px;height:104px;margin:0 auto 14px;display:block}
+.menu-grande{display:flex;flex-direction:column;gap:12px;padding:18px 16px 6px}
+.tarjeta-accion{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 18px;border-radius:var(--radio);color:#fff;
+  box-shadow:var(--sombra);text-align:left;width:100%;
+}
+.tarjeta-accion .txt{flex:1}
+.tarjeta-accion b{display:block;font-size:20px;font-weight:600;font-family:var(--serif)}
+.tarjeta-accion small{opacity:.92;font-size:14px}
+.tarjeta-accion .flecha{font-size:22px;opacity:.85}
+.ta-1{background:linear-gradient(135deg,#B84462,#A6384F)}
+.ta-2{background:linear-gradient(135deg,#5C9A69,#4F8A5B)}
+.ta-3{background:linear-gradient(135deg,#6E9DBB,#5F8FAE)}
+.ta-4{background:linear-gradient(135deg,#D6C1A7,#C3A98C)}
+.icono-cuadro{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.22);font-size:20px}
+.resumen{margin:6px 16px 20px;padding:14px 16px;background:var(--blanco);border-radius:var(--radio);box-shadow:var(--sombra);display:flex;justify-content:space-around;text-align:center}
+.resumen div b{display:block;font-family:var(--serif);font-size:24px;color:var(--granate)}
+.resumen div span{font-size:13px;color:var(--tinta-suave)}
+
+/* ---------- listas ---------- */
+.fila{
+  display:flex;gap:12px;align-items:center;width:100%;
+  background:var(--blanco);border-radius:var(--radio);padding:10px;
+  margin-bottom:10px;box-shadow:var(--sombra);text-align:left;
+}
+.miniatura{width:66px;height:66px;border-radius:12px;object-fit:cover;flex:none;background:var(--rosa-claro)}
+.miniatura.vacia{display:grid;place-items:center;font-size:26px}
+.fila .datos{flex:1;min-width:0}
+.fila .datos b{display:block;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila .datos span{font-size:14px;color:var(--tinta-suave);display:block}
+.fila .flecha{color:var(--rosa);font-size:20px}
+.pin{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--rosa-claro);color:var(--granate-osc);font-size:12px;margin-right:6px}
+.pin.proceso{background:#FBF0DA;color:#8A6512}
+
+/* ---------- formularios ---------- */
+label.campo{display:block;margin-bottom:14px}
+label.campo > span{display:block;font-size:15px;color:var(--tinta-suave);margin-bottom:5px}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;padding:13px 14px;border:1px solid var(--linea);border-radius:14px;
+  background:var(--blanco);appearance:none;
+}
+textarea{min-height:96px;resize:vertical}
+select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9'><path d='M1 1l6 6 6-6' stroke='%23A6384F' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 14px center}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid rgba(166,56,79,.35);outline-offset:1px}
+.btn{display:block;width:100%;padding:15px;border-radius:15px;font-size:18px;font-weight:600;text-align:center}
+.btn-principal{background:var(--granate);color:#fff;box-shadow:var(--sombra)}
+.btn-verde{background:var(--verde);color:#fff}
+.btn-whatsapp{background:var(--whatsapp);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-suave{background:var(--rosa-claro);color:var(--granate-osc)}
+.btn-borde{background:var(--blanco);color:var(--granate);border:1px solid var(--rosa)}
+.btn+.btn{margin-top:10px}
+.par{display:flex;gap:10px}
+.par .btn{flex:1}
+
+/* fotos en el formulario */
+.zona-foto{
+  border:2px dashed var(--rosa);border-radius:var(--radio);background:var(--blanco);
+  padding:22px;text-align:center;color:var(--granate);margin-bottom:12px;width:100%;
+}
+.zona-foto b{display:block;font-size:18px;font-family:var(--serif)}
+.zona-foto small{color:var(--tinta-suave)}
+.tira{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px}
+.tira .caja{position:relative;flex:none}
+.tira img{width:72px;height:72px;object-fit:cover;border-radius:12px;display:block}
+.tira .quitar{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;background:var(--granate);color:#fff;font-size:14px;line-height:24px;text-align:center}
+.tira .mas{width:72px;height:72px;border-radius:12px;border:1px dashed var(--rosa);color:var(--granate);font-size:26px;background:var(--blanco)}
+
+/* ---------- ficha ---------- */
+.foto-grande{
+  display:block;width:100%;height:auto;
+  max-height:52vh;object-fit:contain;
+  background:var(--rosa-claro);
+}
+.marco-foto{background:var(--rosa-claro);border-bottom:1px solid var(--linea)}
+.marco-foto.sin-foto{height:180px;display:grid;place-items:center;font-size:42px}
+.galeria{display:flex;gap:8px;overflow-x:auto;padding:10px 16px 0}
+.galeria img{width:66px;height:66px;object-fit:cover;border-radius:10px;flex:none;border:2px solid transparent}
+.galeria img.sel{border-color:var(--granate)}
+.ficha h2{font-size:26px;margin:4px 0 14px}
+.dato{display:flex;gap:10px;align-items:flex-start;margin-bottom:11px}
+.dato .ico{width:24px;text-align:center;flex:none}
+.dato .et{color:var(--tinta-suave);margin-right:4px}
+.notas{background:var(--rosa-claro);border-radius:14px;padding:12px 14px;margin:6px 0 18px;font-family:var(--serif);font-size:17px}
+
+/* ---------- menú inferior ---------- */
+nav.abajo{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:30;
+  width:100%;max-width:460px;
+  display:flex;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
+  border-top:1px solid var(--linea);padding-bottom:env(safe-area-inset-bottom);
+}
+nav.abajo button{flex:1;padding:9px 2px 8px;color:var(--tinta-suave);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.abajo button svg{width:24px;height:24px;fill:currentColor}
+nav.abajo button.on{color:var(--granate);font-weight:600}
+
+/* ---------- varios ---------- */
+.vacio{text-align:center;padding:44px 24px;color:var(--tinta-suave)}
+.vacio b{display:block;font-family:var(--serif);font-size:21px;color:var(--tinta);margin-bottom:6px}
+.aviso{background:#F6EFE4;border-radius:14px;padding:12px 14px;font-size:15px;color:#6B5836;display:flex;gap:9px;align-items:flex-start;margin-top:14px}
+.opcion{display:flex;gap:13px;align-items:center;width:100%;background:var(--blanco);border-radius:var(--radio);padding:14px;margin-bottom:10px;box-shadow:var(--sombra);text-align:left}
+.opcion .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--rosa-claro);font-size:19px;flex:none}
+.opcion b{display:block;font-size:17px;font-weight:600}
+.opcion span{font-size:14px;color:var(--tinta-suave)}
+.radio{display:flex;gap:12px;align-items:center;background:var(--blanco);border-radius:var(--radio);padding:14px;margin-bottom:10px;box-shadow:var(--sombra);width:100%;text-align:left}
+.radio .marca{width:24px;height:24px;border-radius:50%;border:2px solid var(--granate);flex:none;display:grid;place-items:center}
+.radio.on .marca:after{content:"";width:12px;height:12px;border-radius:50%;background:var(--granate)}
+.check{width:26px;height:26px;border-radius:8px;border:2px solid var(--rosa);flex:none;display:grid;place-items:center;color:#fff;font-size:15px}
+.check.on{background:var(--granate);border-color:var(--granate)}
+.titulillo{font-family:var(--serif);font-size:19px;margin:22px 0 10px}
+.aviso-flotante{
+  position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:428px;
+  bottom:calc(86px + env(safe-area-inset-bottom));z-index:60;
+  background:var(--tinta);color:#fff;padding:13px 16px;border-radius:14px;text-align:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.2);opacity:0;transition:opacity .25s;pointer-events:none;font-size:16px;
+}
+.aviso-flotante.ver{opacity:1}
+.cargando{text-align:center;padding:40px;color:var(--tinta-suave)}
+</style>
+</head>
+<body>
+
+<!-- ================= 1. INICIO ================= -->
+<section id="p-inicio" class="pantalla activa">
+  <div class="portada quilt">
+    <svg class="corazon" viewBox="0 0 100 100" aria-hidden="true">
+      <defs>
+        <clipPath id="c"><path d="M50 88C22 68 8 52 8 34 8 21 18 11 30 11c8 0 15 4 20 11 5-7 12-11 20-11 12 0 22 10 22 23 0 18-14 34-42 54z"/></clipPath>
+      </defs>
+      <g clip-path="url(#c)">
+        <rect width="100" height="100" fill="#F3D5DA"/>
+        <g>
+          <rect x="0" y="0" width="25" height="25" fill="#E7A3B0"/><rect x="50" y="0" width="25" height="25" fill="#C9DCC9"/>
+          <rect x="25" y="25" width="25" height="25" fill="#E7A3B0"/><rect x="75" y="25" width="25" height="25" fill="#E7A3B0"/>
+          <rect x="0" y="50" width="25" height="25" fill="#C9DCC9"/><rect x="50" y="50" width="25" height="25" fill="#E7A3B0"/>
+          <rect x="25" y="75" width="25" height="25" fill="#C9DCC9"/><rect x="75" y="75" width="25" height="25" fill="#C9DCC9"/>
+        </g>
+        <path d="M0 0L100 100M100 0L0 100" stroke="#fff" stroke-width="2" opacity=".7"/>
+      </g>
+      <path d="M50 88C22 68 8 52 8 34 8 21 18 11 30 11c8 0 15 4 20 11 5-7 12-11 20-11 12 0 22 10 22 23 0 18-14 34-42 54z" fill="none" stroke="#A6384F" stroke-width="3"/>
+    </svg>
+    <h1>Las labores<br>de Mariví</h1>
+    <p>Mis trabajos, mis recuerdos</p>
+  </div>
+
+  <div class="resumen">
+    <div><b id="r-total">0</b><span>labores</span></div>
+    <div><b id="r-anio">0</b><span>este año</span></div>
+    <div><b id="r-personas">0</b><span>personas</span></div>
+  </div>
+
+  <div class="menu-grande">
+    <button class="tarjeta-accion ta-1" onclick="irA('labores')">
+      <span class="icono-cuadro">▦</span>
+      <span class="txt"><b>Mis labores</b><small>Ver todos mis trabajos</small></span>
+      <span class="flecha">›</span>
+    </button>
+    <button class="tarjeta-accion ta-2" onclick="nuevaLabor()">
+      <span class="icono-cuadro">＋</span>
+      <span class="txt"><b>Añadir una labor</b><small>Guardar un trabajo nuevo</small></span>
+      <span class="flecha">›</span>
+    </button>
+    <button class="tarjeta-accion ta-3" onclick="irA('buscar')">
+      <span class="icono-cuadro">⌕</span>
+      <span class="txt"><b>Buscar</b><small>Encuentra lo que necesitas</small></span>
+      <span class="flecha">›</span>
+    </button>
+    <button class="tarjeta-accion ta-4" onclick="abrirCompartir(null)">
+      <span class="icono-cuadro">⤴</span>
+      <span class="txt"><b>Compartir</b><small>Enviar por WhatsApp</small></span>
+      <span class="flecha">›</span>
+    </button>
+  </div>
+  <div class="cuerpo" style="padding-top:4px">
+    <div class="aviso" id="aviso-copia" hidden>
+      <span>💾</span><span>Hace tiempo que no guardas una copia de tus labores. <a href="#" onclick="irA('copia');return false;">Guardar copia ahora</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2. MIS LABORES ================= -->
+<section id="p-labores" class="pantalla">
+  <div class="barra">
+    <span class="lado"></span>
+    <h2>Mis labores<span class="sub" id="cuenta-labores">0 trabajos</span></h2>
+    <span class="lado der"><select id="orden" onchange="pintarLabores()" style="width:auto;padding:7px 30px 7px 10px;font-size:15px;border-radius:10px">
+      <option value="reciente">Más nuevas</option>
+      <option value="antigua">Más antiguas</option>
+      <option value="nombre">Por nombre</option>
+      <option value="persona">Por persona</option>
+      <option value="favoritas">Favoritas</option>
+    </select></span>
+  </div>
+  <div class="cuerpo" id="lista-labores"></div>
+</section>
+
+<!-- ================= 3. NUEVA / EDITAR LABOR ================= -->
+<section id="p-nueva" class="pantalla">
+  <div class="barra">
+    <button class="lado" onclick="volver()">‹ Volver</button>
+    <h2 id="titulo-form">Nueva labor</h2>
+    <span class="lado der"></span>
+  </div>
+  <div class="cuerpo">
+    <button class="zona-foto" onclick="document.getElementById('entrada-fotos').click()">
+      <div style="font-size:30px">📷</div>
+      <b>Añadir fotos</b>
+      <small>Puedes añadir varias fotos</small>
+    </button>
+    <input type="file" id="entrada-fotos" accept="image/*" multiple hidden onchange="aceptarFotos(this)">
+    <div class="tira" id="tira-fotos"></div>
+
+    <label class="campo"><span>Nombre del trabajo</span>
+      <input type="text" id="f-nombre" placeholder="Ej. Manta de patchwork" autocomplete="off"></label>
+
+    <div class="par" style="gap:10px">
+      <label class="campo" style="flex:1"><span>Año</span>
+        <select id="f-anio"></select></label>
+      <label class="campo" style="flex:1"><span>Estado</span>
+        <select id="f-estado"><option value="Terminado">Terminado</option><option value="En proceso">En proceso</option></select></label>
+    </div>
+
+    <label class="campo"><span>Tipo de labor</span>
+      <select id="f-tipolabor" onchange="opcionNueva(this,'tiposLabor')"></select></label>
+
+    <label class="campo"><span>Tipo de trabajo</span>
+      <select id="f-tipotrabajo" onchange="opcionNueva(this,'tiposTrabajo')"></select></label>
+
+    <label class="campo"><span>Para quién es</span>
+      <select id="f-persona" onchange="opcionNueva(this,'personas')"></select></label>
+
+    <label class="campo"><span>Tiempo empleado</span>
+      <input type="text" id="f-tiempo" placeholder="Ej. 2 meses, 40 horas..." autocomplete="off"></label>
+
+    <label class="campo"><span>Notas</span>
+      <textarea id="f-notas" placeholder="Telas, patrón, dónde compraste el material, para qué ocasión..."></textarea></label>
+
+    <button class="btn btn-principal" onclick="guardarLabor()">Guardar labor</button>
+    <button class="btn btn-suave" id="btn-borrar" hidden onclick="borrarLabor()">Borrar esta labor</button>
+  </div>
+</section>
+
+<!-- ================= 4. FICHA ================= -->
+<section id="p-ficha" class="pantalla">
+  <div class="barra">
+    <button class="lado" onclick="volver()">‹ Volver</button>
+    <h2>Ficha</h2>
+    <button class="lado der" onclick="editarActual()">Editar</button>
+  </div>
+  <div id="ficha-contenido"></div>
+</section>
+
+<!-- ================= 5. BUSCAR ================= -->
+<section id="p-buscar" class="pantalla">
+  <div class="barra"><span class="lado"></span><h2>Buscar labores</h2><span class="lado der"></span></div>
+  <div class="cuerpo">
+    <label class="campo"><span>Buscar por nombre, persona o notas</span>
+      <input type="text" id="b-texto" placeholder="Escribe aquí..." autocomplete="off"></label>
+    <label class="campo"><span>Año</span><select id="b-anio"></select></label>
+    <label class="campo"><span>Tipo de labor</span><select id="b-tipolabor"></select></label>
+    <label class="campo"><span>Tipo de trabajo</span><select id="b-tipotrabajo"></select></label>
+    <label class="campo"><span>Para quién</span><select id="b-persona"></select></label>
+    <button class="btn btn-principal" onclick="buscar()">Buscar</button>
+    <button class="btn btn-suave" onclick="limpiarFiltros()">Limpiar filtros</button>
+  </div>
+</section>
+
+<!-- ================= 6. RESULTADOS ================= -->
+<section id="p-resultados" class="pantalla">
+  <div class="barra">
+    <button class="lado" onclick="irA('buscar')">‹ Volver</button>
+    <h2>Resultados<span class="sub" id="cuenta-resultados"></span></h2>
+    <span class="lado der"></span>
+  </div>
+  <div class="cuerpo" id="lista-resultados"></div>
+</section>
+
+<!-- ================= 7. COMPARTIR ================= -->
+<section id="p-compartir" class="pantalla">
+  <div class="barra">
+    <button class="lado" onclick="volver()">‹ Volver</button>
+    <h2>Compartir</h2>
+    <span class="lado der"></span>
+  </div>
+  <div class="cuerpo">
+    <p style="margin-top:0;color:var(--tinta-suave)">Elige qué quieres enviar:</p>
+    <div id="compartir-uno"></div>
+    <div class="titulillo">O elige varios trabajos</div>
+    <div id="compartir-lista"></div>
+    <button class="btn btn-whatsapp" style="margin-top:14px" onclick="enviarSeleccion()">
+      <span>✆</span> Compartir por WhatsApp</button>
+    <div class="aviso"><span>🔒</span><span>Todo sigue siendo privado. Solo se comparte lo que tú elijas, cuando tú lo elijas.</span></div>
+  </div>
+</section>
+
+<!-- ================= 8. MÁS ================= -->
+<section id="p-mas" class="pantalla">
+  <div class="barra"><span class="lado"></span><h2>Más</h2><span class="lado der"></span></div>
+  <div class="cuerpo">
+    <button class="opcion" onclick="irA('numeros')"><span class="ico">📊</span><span><b>Mis números</b><span>Cuántas labores, horas y regalos</span></span></button>
+    <button class="opcion" onclick="editarLista('tiposLabor','Tipos de labor')"><span class="ico">🧵</span><span><b>Tipos de labor</b><span id="v-tiposLabor">Patchwork, punto de cruz...</span></span></button>
+    <button class="opcion" onclick="editarLista('tiposTrabajo','Tipos de trabajo')"><span class="ico">🧶</span><span><b>Tipos de trabajo</b><span id="v-tiposTrabajo">Manta, bolsa, cojín...</span></span></button>
+    <button class="opcion" onclick="editarLista('personas','Personas')"><span class="ico">👥</span><span><b>Personas</b><span id="v-personas">Para quién haces tus labores</span></span></button>
+    <button class="opcion" onclick="irA('copia')"><span class="ico">💾</span><span><b>Copia de seguridad</b><span id="v-copia">Guarda tus labores a salvo</span></span></button>
+    <button class="opcion" onclick="irA('ayuda')"><span class="ico">❔</span><span><b>Ayuda</b><span>Cómo usar la app</span></span></button>
+    <div class="aviso" style="margin-top:18px"><span>❤️</span><span>Las labores de Mariví · versión 1.0<br>Hecha con cariño. Tus fotos y datos se guardan solo en tu iPhone.</span></div>
+  </div>
+</section>
+
+<!-- ================= MIS NÚMEROS ================= -->
+<section id="p-numeros" class="pantalla">
+  <div class="barra"><button class="lado" onclick="irA('mas')">‹ Volver</button><h2>Mis números</h2><span class="lado der"></span></div>
+  <div class="cuerpo" id="cont-numeros"></div>
+</section>
+
+<!-- ================= COPIA DE SEGURIDAD ================= -->
+<section id="p-copia" class="pantalla">
+  <div class="barra"><button class="lado" onclick="irA('mas')">‹ Volver</button><h2>Copia de seguridad</h2><span class="lado der"></span></div>
+  <div class="cuerpo">
+    <p style="margin-top:0">Tus labores se guardan dentro del móvil. Guarda una copia de vez en cuando: así no se pierde nada si cambias de teléfono.</p>
+    <button class="btn btn-principal" onclick="exportar()">Guardar copia de mis labores</button>
+    <button class="btn btn-borde" onclick="document.getElementById('entrada-copia').click()">Restaurar una copia</button>
+    <input type="file" id="entrada-copia" accept=".json,application/json" hidden onchange="importar(this)">
+    <div class="aviso"><span>💡</span><span>Al guardar la copia, elige <b>Guardar en Archivos</b> y luego súbela a iCloud o envíatela por correo.</span></div>
+    <p id="estado-copia" style="color:var(--tinta-suave);font-size:15px"></p>
+  </div>
+</section>
+
+<!-- ================= AYUDA ================= -->
+<section id="p-ayuda" class="pantalla">
+  <div class="barra"><button class="lado" onclick="irA('mas')">‹ Volver</button><h2>Ayuda</h2><span class="lado der"></span></div>
+  <div class="cuerpo" style="font-size:17px">
+    <h3 class="titulillo" style="margin-top:0">Guardar un trabajo</h3>
+    <p>Toca <b>Añadir una labor</b>, haz la foto (o elígela de tus fotos), escribe el nombre y rellena lo que quieras. Solo el nombre es obligatorio. Al final, <b>Guardar labor</b>.</p>
+    <h3 class="titulillo">Cambiar o borrar</h3>
+    <p>Abre la labor desde <b>Mis labores</b> y toca <b>Editar</b> arriba a la derecha.</p>
+    <h3 class="titulillo">Enviar una foto por WhatsApp</h3>
+    <p>Abre la labor y toca el botón verde <b>Compartir</b>. El teléfono te preguntará a quién enviarla.</p>
+    <h3 class="titulillo">¿Se pierden las fotos?</h3>
+    <p>No, mientras no borres la app. Aun así, guarda una copia de vez en cuando desde <b>Más › Copia de seguridad</b>.</p>
+  </div>
+</section>
+
+<!-- ================= MENÚ INFERIOR ================= -->
+<nav class="abajo">
+  <button data-nav="inicio" class="on" onclick="irA('inicio')">
+    <svg viewBox="0 0 24 24"><path d="M12 3 3 10.5V21h6v-6h6v6h6V10.5z"/></svg>Inicio</button>
+  <button data-nav="labores" onclick="irA('labores')">
+    <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>Mis labores</button>
+  <button data-nav="nueva" onclick="nuevaLabor()">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 9h4v2h-4v4h-2v-4H7v-2h4V7h2z"/></svg>Añadir</button>
+  <button data-nav="buscar" onclick="irA('buscar')">
+    <svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 105 14.3l4.9 4.9 1.4-1.4-4.9-4.9A8 8 0 0010 2zm0 2a6 6 0 110 12 6 6 0 010-12z"/></svg>Buscar</button>
+  <button data-nav="mas" onclick="irA('mas')">
+    <svg viewBox="0 0 24 24"><path d="M6 10a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z"/></svg>Más</button>
+</nav>
+
+<div class="aviso-flotante" id="toast"></div>
+
+<script>
+/* ============================================================
+   Las labores de Mariví — todo funciona sin internet
+   Los datos se guardan en el propio teléfono (IndexedDB)
+   ============================================================ */
+
+const PORDEFECTO = {
+  tiposLabor:['Patchwork','Punto de cruz','Ganchillo','Bordado','Costura'],
+  tiposTrabajo:['Manta','Colcha','Cojín','Bolsa','Cuadro','Mantel','Neceser','Organizador'],
+  personas:['Yo','Familia']
+};
+
+let db, labores = [], config = {...PORDEFECTO, ultimaCopia:null};
+let fotosForm = [];          // {id, blob, url} en edición
+let editandoId = null;
+let fichaId = null;
+let historial = ['inicio'];
+let seleccion = new Set();
+const urls = new Map();      // laborId -> [urls]
+
+/* ---------- base de datos ---------- */
+function abrirDB(){
+  return new Promise((res,rej)=>{
+    const p = indexedDB.open('laboresMarivi',1);
+    p.onupgradeneeded = e=>{
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('labores')) d.createObjectStore('labores',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('fotos')){
+        const s = d.createObjectStore('fotos',{keyPath:'id'});
+        s.createIndex('porLabor','laborId');
+      }
+      if(!d.objectStoreNames.contains('config')) d.createObjectStore('config',{keyPath:'k'});
+    };
+    p.onsuccess = e=>res(e.target.result);
+    p.onerror = ()=>rej(p.error);
+  });
+}
+const tx = (store,modo='readonly')=> db.transaction(store,modo).objectStore(store);
+const pedir = req => new Promise((res,rej)=>{req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error)});
+
+async function cargarTodo(){
+  labores = await pedir(tx('labores').getAll());
+  const c = await pedir(tx('config').get('ajustes'));
+  if(c) config = {...config, ...c.valor};
+  labores.sort((a,b)=> (b.creada||0)-(a.creada||0));
+}
+const guardarConfig = ()=> pedir(tx('config','readwrite').put({k:'ajustes',valor:config}));
+
+async function fotosDe(laborId){
+  return await pedir(tx('fotos').index('porLabor').getAll(laborId));
+}
+async function urlsDe(laborId){
+  if(urls.has(laborId)) return urls.get(laborId);
+  const fs = await fotosDe(laborId);
+  const u = fs.map(f=>URL.createObjectURL(f.blob));
+  urls.set(laborId,u);
+  return u;
+}
+const idNuevo = ()=> Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- navegación ---------- */
+const PANTALLAS = ['inicio','labores','nueva','ficha','buscar','resultados','compartir','mas','numeros','copia','ayuda'];
+function irA(p,sinHistorial){
+  PANTALLAS.forEach(x=>document.getElementById('p-'+x).classList.toggle('activa',x===p));
+  document.querySelectorAll('nav.abajo button').forEach(b=>{
+    const n = b.dataset.nav;
+    b.classList.toggle('on', n===p || (p==='resultados'&&n==='buscar') || (p==='ficha'&&n==='labores') || (['numeros','copia','ayuda'].includes(p)&&n==='mas'));
+  });
+  window.scrollTo(0,0);
+  if(!sinHistorial && historial[historial.length-1]!==p) historial.push(p);
+  if(p==='inicio') pintarInicio();
+  if(p==='labores') pintarLabores();
+  if(p==='numeros') pintarNumeros();
+  if(p==='mas') pintarMas();
+}
+function volver(){
+  historial.pop();
+  const anterior = historial[historial.length-1] || 'inicio';
+  irA(anterior,true);
+}
+function toast(txt){
+  const t = document.getElementById('toast');
+  t.textContent = txt; t.classList.add('ver');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('ver'),2600);
+}
+
+/* ---------- inicio ---------- */
+function pintarInicio(){
+  const anio = new Date().getFullYear();
+  document.getElementById('r-total').textContent = labores.length;
+  document.getElementById('r-anio').textContent = labores.filter(l=>String(l.anio)===String(anio)).length;
+  document.getElementById('r-personas').textContent = new Set(labores.map(l=>l.persona).filter(Boolean)).size;
+  const dias = config.ultimaCopia ? (Date.now()-config.ultimaCopia)/86400000 : 999;
+  document.getElementById('aviso-copia').hidden = !(labores.length>=3 && dias>45);
+}
+
+/* ---------- lista de labores ---------- */
+function ordenar(lista){
+  const o = document.getElementById('orden').value;
+  const c = [...lista];
+  if(o==='reciente') c.sort((a,b)=>(b.anio||0)-(a.anio||0)||(b.creada||0)-(a.creada||0));
+  if(o==='antigua')  c.sort((a,b)=>(a.anio||0)-(b.anio||0)||(a.creada||0)-(b.creada||0));
+  if(o==='nombre')   c.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  if(o==='persona')  c.sort((a,b)=>(a.persona||'').localeCompare(b.persona||'','es')||a.nombre.localeCompare(b.nombre,'es'));
+  if(o==='favoritas')c.sort((a,b)=>(b.favorita?1:0)-(a.favorita?1:0)||(b.creada||0)-(a.creada||0));
+  return c;
+}
+async function pintarLabores(){
+  document.getElementById('cuenta-labores').textContent =
+    labores.length===1 ? '1 trabajo' : labores.length+' trabajos';
+  await pintarLista(document.getElementById('lista-labores'), ordenar(labores), true);
+}
+async function pintarLista(cont, lista, conCorazon){
+  if(!lista.length){
+    cont.innerHTML = `<div class="vacio"><b>Aquí aparecerán tus labores</b>
+      Cuando guardes un trabajo lo verás en esta lista con su foto.
+      <div style="margin-top:18px"><button class="btn btn-principal" onclick="nuevaLabor()">Añadir mi primera labor</button></div></div>`;
+    return;
+  }
+  cont.innerHTML = lista.map(l=>`
+    <button class="fila" onclick="abrirFicha('${l.id}')">
+      <span class="miniatura vacia" data-foto="${l.id}">🧵</span>
+      <span class="datos">
+        <b>${esc(l.nombre)}</b>
+        <span>${l.anio||''}${l.tipoLabor?'  ·  '+esc(l.tipoLabor):''}</span>
+        <span>${l.persona?'Para: '+esc(l.persona):''} ${l.estado==='En proceso'?'<i class="pin proceso">En proceso</i>':''}</span>
+      </span>
+      ${conCorazon&&l.favorita?'<span style="color:var(--granate)">♥</span>':''}
+      <span class="flecha">›</span>
+    </button>`).join('');
+  for(const l of lista){
+    const u = await urlsDe(l.id);
+    if(u[0]){
+      const hueco = cont.querySelector(`[data-foto="${l.id}"]`);
+      if(hueco) hueco.outerHTML = `<img class="miniatura" src="${u[0]}" alt="">`;
+    }
+  }
+}
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- formulario ---------- */
+function rellenarSelects(){
+  const anios = document.getElementById('f-anio');
+  const actual = new Date().getFullYear();
+  anios.innerHTML = '';
+  for(let a=actual; a>=actual-40; a--) anios.insertAdjacentHTML('beforeend',`<option value="${a}">${a}</option>`);
+  llenar('f-tipolabor','tiposLabor'); llenar('f-tipotrabajo','tiposTrabajo'); llenar('f-persona','personas');
+}
+function llenar(id,clave){
+  const s = document.getElementById(id);
+  s.innerHTML = `<option value="">Sin especificar</option>` +
+    config[clave].map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('') +
+    `<option value="__nuevo">+ Añadir otro...</option>`;
+}
+function opcionNueva(sel,clave){
+  if(sel.value!=='__nuevo') return;
+  const v = (prompt('Escribe el nombre nuevo:')||'').trim();
+  sel.value='';
+  if(!v) return;
+  if(!config[clave].includes(v)){ config[clave].push(v); config[clave].sort((a,b)=>a.localeCompare(b,'es')); guardarConfig(); }
+  llenar(sel.id,clave); sel.value = v;
+}
+function nuevaLabor(){
+  editandoId = null;
+  document.getElementById('titulo-form').textContent = 'Nueva labor';
+  document.getElementById('btn-borrar').hidden = true;
+  rellenarSelects();
+  ['f-nombre','f-tiempo','f-notas'].forEach(i=>document.getElementById(i).value='');
+  ['f-tipolabor','f-tipotrabajo','f-persona'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('f-anio').value = new Date().getFullYear();
+  document.getElementById('f-estado').value = 'Terminado';
+  fotosForm = []; pintarTira();
+  irA('nueva');
+}
+async function editarActual(){
+  const l = labores.find(x=>x.id===fichaId); if(!l) return;
+  editandoId = l.id;
+  document.getElementById('titulo-form').textContent = 'Editar labor';
+  document.getElementById('btn-borrar').hidden = false;
+  rellenarSelects();
+  document.getElementById('f-nombre').value = l.nombre||'';
+  document.getElementById('f-anio').value = l.anio||new Date().getFullYear();
+  document.getElementById('f-estado').value = l.estado||'Terminado';
+  ponerSelect('f-tipolabor','tiposLabor',l.tipoLabor);
+  ponerSelect('f-tipotrabajo','tiposTrabajo',l.tipoTrabajo);
+  ponerSelect('f-persona','personas',l.persona);
+  document.getElementById('f-tiempo').value = l.tiempo||'';
+  document.getElementById('f-notas').value = l.notas||'';
+  const fs = await fotosDe(l.id);
+  fotosForm = fs.map(f=>({id:f.id, blob:f.blob, url:URL.createObjectURL(f.blob)}));
+  pintarTira();
+  irA('nueva');
+}
+function ponerSelect(id,clave,valor){
+  if(valor && !config[clave].includes(valor)){ config[clave].push(valor); llenar(id,clave); }
+  document.getElementById(id).value = valor||'';
+}
+
+/* ---------- fotos ---------- */
+async function aceptarFotos(input){
+  const archivos = [...input.files];
+  input.value='';
+  for(const a of archivos){
+    try{
+      const blob = await comprimir(a);
+      fotosForm.push({id:idNuevo(), blob, url:URL.createObjectURL(blob)});
+    }catch(e){ toast('No se ha podido añadir una foto'); }
+  }
+  pintarTira();
+}
+function comprimir(archivo, max=1400, calidad=0.82){
+  return new Promise((res,rej)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let {width:w, height:h} = img;
+      const f = Math.min(1, max/Math.max(w,h));
+      w = Math.round(w*f); h = Math.round(h*f);
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      c.toBlob(b=> b?res(b):rej(new Error('sin blob')), 'image/jpeg', calidad);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(archivo);
+  });
+}
+function pintarTira(){
+  const t = document.getElementById('tira-fotos');
+  t.innerHTML = fotosForm.map((f,i)=>`
+    <span class="caja"><img src="${f.url}" alt="">
+    <button class="quitar" onclick="quitarFoto(${i})" aria-label="Quitar foto">×</button></span>`).join('') +
+    (fotosForm.length?`<button class="mas" onclick="document.getElementById('entrada-fotos').click()">＋</button>`:'');
+}
+function quitarFoto(i){ fotosForm.splice(i,1); pintarTira(); }
+
+/* ---------- guardar / borrar ---------- */
+async function guardarLabor(){
+  const nombre = document.getElementById('f-nombre').value.trim();
+  if(!nombre){ toast('Ponle un nombre al trabajo'); document.getElementById('f-nombre').focus(); return; }
+  const l = {
+    id: editandoId || idNuevo(),
+    nombre,
+    anio: parseInt(document.getElementById('f-anio').value)||new Date().getFullYear(),
+    estado: document.getElementById('f-estado').value,
+    tipoLabor: document.getElementById('f-tipolabor').value,
+    tipoTrabajo: document.getElementById('f-tipotrabajo').value,
+    persona: document.getElementById('f-persona').value,
+    tiempo: document.getElementById('f-tiempo').value.trim(),
+    notas: document.getElementById('f-notas').value.trim(),
+    favorita: (labores.find(x=>x.id===editandoId)||{}).favorita||false,
+    creada: (labores.find(x=>x.id===editandoId)||{}).creada || Date.now(),
+    modificada: Date.now()
+  };
+  await pedir(tx('labores','readwrite').put(l));
+  // fotos: borrar las que ya no están y guardar las nuevas
+  const antiguas = await fotosDe(l.id);
+  const store = tx('fotos','readwrite');
+  const quedan = new Set(fotosForm.map(f=>f.id));
+  antiguas.filter(f=>!quedan.has(f.id)).forEach(f=>store.delete(f.id));
+  fotosForm.forEach((f,orden)=>store.put({id:f.id, laborId:l.id, blob:f.blob, orden}));
+  urls.delete(l.id);
+  ['tiposLabor','tiposTrabajo','personas'].forEach((c,i)=>{
+    const v = [l.tipoLabor,l.tipoTrabajo,l.persona][i];
+    if(v && !config[c].includes(v)) config[c].push(v);
+  });
+  await guardarConfig();
+  await cargarTodo();
+  toast(editandoId ? 'Cambios guardados' : 'Labor guardada');
+  fichaId = l.id;
+  historial = ['inicio','labores'];
+  abrirFicha(l.id);
+}
+async function borrarLabor(){
+  if(!editandoId) return;
+  if(!confirm('¿Seguro que quieres borrar esta labor? No se puede recuperar.')) return;
+  const fs = await fotosDe(editandoId);
+  const s = tx('fotos','readwrite'); fs.forEach(f=>s.delete(f.id));
+  await pedir(tx('labores','readwrite').delete(editandoId));
+  urls.delete(editandoId);
+  await cargarTodo();
+  toast('Labor borrada');
+  historial=['inicio']; irA('labores');
+}
+
+/* ---------- ficha ---------- */
+async function abrirFicha(id){
+  fichaId = id;
+  const l = labores.find(x=>x.id===id); if(!l) return;
+  const u = await urlsDe(id);
+  const c = document.getElementById('ficha-contenido');
+  c.innerHTML = `
+    ${u.length?`<div class="marco-foto"><img class="foto-grande" id="foto-principal" src="${u[0]}" alt="${esc(l.nombre)}"></div>`
+      :`<div class="marco-foto sin-foto quilt">🧵</div>`}
+    ${u.length>1?`<div class="galeria">${u.map((x,i)=>`<img src="${x}" class="${i===0?'sel':''}" onclick="cambiarFoto(this,'${x}')" alt="">`).join('')}</div>`:''}
+    <div class="cuerpo ficha">
+      <h2>${esc(l.nombre)} ${l.favorita?'<span style="color:var(--granate)">♥</span>':''}</h2>
+      <div class="dato"><span class="ico">📅</span><span><span class="et">Año:</span>${l.anio||'—'}${l.estado==='En proceso'?' <i class="pin proceso">En proceso</i>':''}</span></div>
+      ${l.tipoLabor?`<div class="dato"><span class="ico">🧵</span><span><span class="et">Tipo de labor:</span>${esc(l.tipoLabor)}</span></div>`:''}
+      ${l.tipoTrabajo?`<div class="dato"><span class="ico">🧶</span><span><span class="et">Tipo de trabajo:</span>${esc(l.tipoTrabajo)}</span></div>`:''}
+      ${l.persona?`<div class="dato"><span class="ico">🎁</span><span><span class="et">Para quién:</span>${esc(l.persona)}</span></div>`:''}
+      ${l.tiempo?`<div class="dato"><span class="ico">⏱</span><span><span class="et">Tiempo empleado:</span>${esc(l.tiempo)}</span></div>`:''}
+      ${l.notas?`<div class="dato" style="display:block"><span class="et">Notas:</span><div class="notas">${esc(l.notas)}</div></div>`:''}
+      <div class="par" style="margin-top:16px">
+        <button class="btn btn-whatsapp" onclick="compartirLabor('${l.id}')"><span>✆</span> Compartir</button>
+        <button class="btn btn-borde" onclick="alternarFavorita('${l.id}')">${l.favorita?'♥ Favorita':'♡ Favorita'}</button>
+      </div>
+    </div>`;
+  irA('ficha');
+}
+function cambiarFoto(el,src){
+  document.getElementById('foto-principal').src = src;
+  document.querySelectorAll('.galeria img').forEach(i=>i.classList.remove('sel'));
+  el.classList.add('sel');
+}
+async function alternarFavorita(id){
+  const l = labores.find(x=>x.id===id); l.favorita = !l.favorita;
+  await pedir(tx('labores','readwrite').put(l));
+  abrirFicha(id);
+}
+
+/* ---------- buscar ---------- */
+function prepararBuscar(){
+  const anios = [...new Set(labores.map(l=>l.anio).filter(Boolean))].sort((a,b)=>b-a);
+  opciones('b-anio',anios); opciones('b-tipolabor',config.tiposLabor);
+  opciones('b-tipotrabajo',config.tiposTrabajo); opciones('b-persona',config.personas);
+}
+function opciones(id,vals){
+  const s = document.getElementById(id);
+  const previo = s.value;
+  s.innerHTML = `<option value="">Todos</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  s.value = previo;
+}
+function limpiarFiltros(){
+  ['b-texto','b-anio','b-tipolabor','b-tipotrabajo','b-persona'].forEach(i=>document.getElementById(i).value='');
+  toast('Filtros limpios');
+}
+async function buscar(){
+  const t = document.getElementById('b-texto').value.trim().toLowerCase();
+  const f = id => document.getElementById(id).value;
+  const res = labores.filter(l=>{
+    if(f('b-anio') && String(l.anio)!==f('b-anio')) return false;
+    if(f('b-tipolabor') && l.tipoLabor!==f('b-tipolabor')) return false;
+    if(f('b-tipotrabajo') && l.tipoTrabajo!==f('b-tipotrabajo')) return false;
+    if(f('b-persona') && l.persona!==f('b-persona')) return false;
+    if(t){
+      const todo = [l.nombre,l.persona,l.notas,l.tipoLabor,l.tipoTrabajo].join(' ').toLowerCase();
+      if(!todo.includes(t)) return false;
+    }
+    return true;
+  });
+  document.getElementById('cuenta-resultados').textContent =
+    res.length===1?'1 trabajo encontrado':res.length+' trabajos encontrados';
+  const cont = document.getElementById('lista-resultados');
+  if(!res.length){
+    cont.innerHTML = `<div class="vacio"><b>No hay nada con esos filtros</b>Prueba con menos filtros o busca solo por el nombre.</div>`;
+  }else{
+    await pintarLista(cont,res,true);
+  }
+  irA('resultados');
+}
+
+/* ---------- compartir ---------- */
+function abrirCompartir(id){
+  seleccion.clear();
+  const uno = document.getElementById('compartir-uno');
+  if(id){ seleccion.add(id); }
+  const l = id ? labores.find(x=>x.id===id) : null;
+  uno.innerHTML = l ? `<div class="radio on"><span class="marca"></span><span><b>${esc(l.nombre)}</b><span>${l.anio||''} · Para: ${esc(l.persona||'—')}</span></span></div>` : '';
+  pintarSeleccion();
+  irA('compartir');
+}
+function pintarSeleccion(){
+  const cont = document.getElementById('compartir-lista');
+  if(!labores.length){ cont.innerHTML = `<div class="vacio">Todavía no hay labores que compartir.</div>`; return; }
+  cont.innerHTML = labores.slice(0,60).map(l=>`
+    <button class="radio" onclick="alternarSel('${l.id}',this)">
+      <span class="check ${seleccion.has(l.id)?'on':''}">${seleccion.has(l.id)?'✓':''}</span>
+      <span><b>${esc(l.nombre)}</b><span>${l.anio||''} · ${esc(l.persona||'')}</span></span>
+    </button>`).join('');
+}
+function alternarSel(id){
+  seleccion.has(id) ? seleccion.delete(id) : seleccion.add(id);
+  pintarSeleccion();
+}
+function textoDe(l){
+  return [l.nombre,
+    [l.anio, l.tipoLabor].filter(Boolean).join(' · '),
+    l.persona?'Para: '+l.persona:'',
+    l.tiempo?'Tiempo: '+l.tiempo:'',
+    l.notas].filter(Boolean).join('\n');
+}
+async function compartirLabor(id){
+  const l = labores.find(x=>x.id===id);
+  const fs = await fotosDe(id);
+  await lanzarCompartir([{labor:l, fotos:fs.slice(0,4)}]);
+}
+async function enviarSeleccion(){
+  if(!seleccion.size){ toast('Elige al menos un trabajo'); return; }
+  const items = [];
+  for(const id of seleccion){
+    const l = labores.find(x=>x.id===id);
+    const fs = await fotosDe(id);
+    items.push({labor:l, fotos:fs.slice(0, seleccion.size>1?1:4)});
+  }
+  await lanzarCompartir(items);
+}
+async function lanzarCompartir(items){
+  const texto = items.map(i=>textoDe(i.labor)).join('\n\n———\n\n') + '\n\n— Las labores de Mariví';
+  const archivos = [];
+  items.forEach(i=>i.fotos.forEach((f,n)=>{
+    archivos.push(new File([f.blob], limpiar(i.labor.nombre)+(n?('-'+(n+1)):'')+'.jpg', {type:'image/jpeg'}));
+  }));
+  try{
+    if(archivos.length && navigator.canShare && navigator.canShare({files:archivos})){
+      await navigator.share({files:archivos, text:texto});
+    }else if(navigator.share){
+      await navigator.share({text:texto});
+    }else{
+      await copiar(texto);
+      archivos.slice(0,4).forEach(descargarArchivo);
+      toast('Texto copiado y fotos guardadas');
+    }
+  }catch(e){ if(e && e.name!=='AbortError') toast('No se ha podido compartir'); }
+}
+const limpiar = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').slice(0,40)||'labor';
+async function copiar(t){ try{ await navigator.clipboard.writeText(t); }catch(e){} }
+function descargarArchivo(archivo){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(archivo); a.download = archivo.name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+
+/* ---------- más / listas ---------- */
+function pintarMas(){
+  ['tiposLabor','tiposTrabajo','personas'].forEach(c=>{
+    const el = document.getElementById('v-'+c);
+    if(el) el.textContent = config[c].slice(0,4).join(', ') + (config[c].length>4?'...':'');
+  });
+  const el = document.getElementById('v-copia');
+  el.textContent = config.ultimaCopia
+    ? 'Última copia: '+new Date(config.ultimaCopia).toLocaleDateString('es-ES')
+    : 'Todavía no has guardado ninguna copia';
+}
+function editarLista(clave,titulo){
+  const actual = config[clave].join(', ');
+  const v = prompt(titulo+'\n\nEscribe las opciones separadas por comas:',actual);
+  if(v===null) return;
+  config[clave] = v.split(',').map(x=>x.trim()).filter(Boolean);
+  guardarConfig(); pintarMas(); prepararBuscar();
+  toast('Lista actualizada');
+}
+
+/* ---------- mis números ---------- */
+function pintarNumeros(){
+  const c = document.getElementById('cont-numeros');
+  if(!labores.length){ c.innerHTML = `<div class="vacio"><b>Aún no hay números</b>Guarda tu primera labor y aquí verás tu resumen.</div>`; return; }
+  const porAnio = agrupar(labores,l=>l.anio||'Sin año');
+  const porTipo = agrupar(labores,l=>l.tipoLabor||'Sin tipo');
+  const porPersona = agrupar(labores,l=>l.persona||'Sin destinatario');
+  const enProceso = labores.filter(l=>l.estado==='En proceso').length;
+  c.innerHTML = `
+    <div class="resumen" style="margin:0 0 16px">
+      <div><b>${labores.length}</b><span>labores</span></div>
+      <div><b>${Object.keys(porPersona).length}</b><span>personas</span></div>
+      <div><b>${enProceso}</b><span>en proceso</span></div>
+    </div>
+    ${bloque('Por año',porAnio,true)}
+    ${bloque('Por tipo de labor',porTipo)}
+    ${bloque('Para quién',porPersona)}`;
+}
+function agrupar(arr,f){
+  return arr.reduce((a,l)=>{const k=f(l); a[k]=(a[k]||0)+1; return a;},{});
+}
+function bloque(titulo,obj,ordenNum){
+  const max = Math.max(...Object.values(obj));
+  const claves = Object.keys(obj).sort(ordenNum?(a,b)=>b-a:(a,b)=>obj[b]-obj[a]);
+  return `<h3 class="titulillo">${titulo}</h3>` + claves.map(k=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="width:38%;font-size:15px">${esc(k)}</span>
+      <span style="flex:1;height:14px;border-radius:7px;background:var(--rosa-claro);overflow:hidden">
+        <span style="display:block;height:100%;width:${Math.round(obj[k]/max*100)}%;background:var(--granate)"></span></span>
+      <b style="width:26px;text-align:right;font-family:var(--serif)">${obj[k]}</b>
+    </div>`).join('');
+}
+
+/* ---------- copia de seguridad ---------- */
+const blobADataURL = b => new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(b)});
+async function exportar(){
+  document.getElementById('estado-copia').textContent = 'Preparando la copia...';
+  const fotos = await pedir(tx('fotos').getAll());
+  const datos = {app:'labores-marivi', version:1, fecha:new Date().toISOString(), config, labores,
+    fotos: await Promise.all(fotos.map(async f=>({id:f.id, laborId:f.laborId, orden:f.orden||0, datos: await blobADataURL(f.blob)})))};
+  const blob = new Blob([JSON.stringify(datos)],{type:'application/json'});
+  const fecha = new Date().toISOString().slice(0,10);
+  descargarArchivo(new File([blob],`labores-marivi-${fecha}.json`,{type:'application/json'}));
+  config.ultimaCopia = Date.now(); await guardarConfig();
+  document.getElementById('estado-copia').textContent = 'Copia creada con '+labores.length+' labores.';
+  toast('Copia guardada');
+}
+async function importar(input){
+  const archivo = input.files[0]; input.value='';
+  if(!archivo) return;
+  try{
+    const datos = JSON.parse(await archivo.text());
+    if(datos.app!=='labores-marivi') throw new Error('formato');
+    if(!confirm(`Esta copia tiene ${datos.labores.length} labores. Se añadirán a las que ya tienes. ¿Continuar?`)) return;
+    // convertir todas las fotos ANTES de abrir la transacción
+    const listas = await Promise.all((datos.fotos||[]).map(async f=>({
+      id:f.id, laborId:f.laborId, orden:f.orden||0,
+      blob: await (await fetch(f.datos)).blob()
+    })));
+    const sl = tx('labores','readwrite');
+    datos.labores.forEach(l=>sl.put(l));
+    const sf = tx('fotos','readwrite');
+    listas.forEach(f=>sf.put(f));
+    if(datos.config){ ['tiposLabor','tiposTrabajo','personas'].forEach(c=>{
+      config[c] = [...new Set([...(config[c]||[]),...(datos.config[c]||[])])]; }); await guardarConfig(); }
+    urls.clear();
+    await cargarTodo();
+    document.getElementById('estado-copia').textContent = 'Copia restaurada. Ahora tienes '+labores.length+' labores.';
+    toast('Copia restaurada');
+  }catch(e){
+    document.getElementById('estado-copia').textContent = 'Ese archivo no es una copia de esta app.';
+  }
+}
+
+/* ---------- arranque ---------- */
+(async function(){
+  try{
+    db = await abrirDB();
+    await cargarTodo();
+  }catch(e){
+    alert('No se ha podido abrir el almacén de la app en este navegador.');
+  }
+  rellenarSelects(); prepararBuscar(); pintarInicio(); pintarMas();
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+  if('serviceWorker' in navigator && location.protocol==='https:'){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
