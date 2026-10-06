@@ -159,7 +159,20 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid r
   max-height:52vh;object-fit:contain;
   background:var(--rosa-claro);
 }
-.marco-foto{background:var(--rosa-claro);border-bottom:1px solid var(--linea)}
+.marco-foto{background:var(--rosa-claro);border-bottom:1px solid var(--linea);position:relative}
+.marco-foto .lupa{position:absolute;right:12px;bottom:12px;background:rgba(59,42,46,.72);color:#fff;font-size:14px;padding:6px 11px;border-radius:999px;pointer-events:none}
+/* visor de fotos a pantalla completa */
+.visor{position:fixed;inset:0;z-index:100;background:#000;display:none;touch-action:none;overflow:hidden;-webkit-user-select:none;user-select:none}
+.visor.ver{display:block}
+.visor img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%;will-change:transform;-webkit-user-drag:none}
+.visor img.anim{transition:transform .22s ease-out}
+.visor .arriba{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:calc(12px + env(safe-area-inset-top)) 14px 12px;background:linear-gradient(rgba(0,0,0,.55),transparent);color:#fff}
+.visor .cerrar{color:#fff;font-size:18px;font-weight:600;background:rgba(255,255,255,.18);padding:9px 16px;border-radius:999px}
+.visor .contador{font-size:16px;opacity:.9}
+.visor .pista{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom));z-index:2;color:#fff;background:rgba(255,255,255,.16);padding:8px 14px;border-radius:999px;font-size:14px;white-space:nowrap;transition:opacity .4s}
+.visor .flecha-v{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:26px;line-height:44px;text-align:center}
+.visor .flecha-v.izq{left:10px}.visor .flecha-v.der{right:10px}
+@media (hover:none){.visor .flecha-v{display:none}}
 .marco-foto.sin-foto{height:180px;display:grid;place-items:center;font-size:42px}
 .galeria{display:flex;gap:8px;overflow-x:auto;padding:10px 16px 0}
 .galeria img{width:66px;height:66px;object-fit:cover;border-radius:10px;flex:none;border:2px solid transparent}
@@ -391,7 +404,7 @@ nav.abajo button.on{color:var(--granate);font-weight:600}
     <button class="opcion" onclick="editarLista('personas','Personas')"><span class="ico">👥</span><span><b>Personas</b><span id="v-personas">Para quién haces tus labores</span></span></button>
     <button class="opcion" onclick="irA('copia')"><span class="ico">💾</span><span><b>Copia de seguridad</b><span id="v-copia">Guarda tus labores a salvo</span></span></button>
     <button class="opcion" onclick="irA('ayuda')"><span class="ico">❔</span><span><b>Ayuda</b><span>Cómo usar la app</span></span></button>
-    <div class="aviso" style="margin-top:18px"><span>❤️</span><span>Las labores de Mariví · versión 1.1<br>Hecha con cariño. Tus fotos y datos se guardan solo en tu iPhone.</span></div>
+    <div class="aviso" style="margin-top:18px"><span>❤️</span><span>Las labores de Mariví · versión 1.2<br>Hecha con cariño. Tus fotos y datos se guardan solo en tu iPhone.</span></div>
   </div>
 </section>
 
@@ -443,6 +456,14 @@ nav.abajo button.on{color:var(--granate);font-weight:600}
   <button data-nav="mas" onclick="irA('mas')">
     <svg viewBox="0 0 24 24"><path d="M6 10a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4zm6 0a2 2 0 110 4 2 2 0 010-4z"/></svg>Más</button>
 </nav>
+
+<div class="visor" id="visor" aria-modal="true" role="dialog">
+  <img id="visor-img" alt="">
+  <div class="arriba"><button class="cerrar" onclick="cerrarVisor()">✕ Cerrar</button><span class="contador" id="visor-contador"></span></div>
+  <button class="flecha-v izq" onclick="pasarFoto(-1)" aria-label="Foto anterior">‹</button>
+  <button class="flecha-v der" onclick="pasarFoto(1)" aria-label="Foto siguiente">›</button>
+  <div class="pista" id="visor-pista">Amplía con dos dedos o toca dos veces</div>
+</div>
 
 <div class="aviso-flotante" id="toast"></div>
 
@@ -736,11 +757,12 @@ async function abrirFicha(id){
   fichaId = id;
   const l = labores.find(x=>x.id===id); if(!l) return;
   const u = await urlsDe(id);
+  fichaUrls = u; fotoActual = 0;
   const c = document.getElementById('ficha-contenido');
   c.innerHTML = `
-    ${u.length?`<div class="marco-foto"><img class="foto-grande" id="foto-principal" src="${u[0]}" alt="${esc(l.nombre)}"></div>`
+    ${u.length?`<div class="marco-foto" onclick="abrirVisor(fotoActual)"><img class="foto-grande" id="foto-principal" src="${u[0]}" alt="${esc(l.nombre)}"><span class="lupa">🔍 Toca para ampliar</span></div>`
       :`<div class="marco-foto sin-foto quilt">🧵</div>`}
-    ${u.length>1?`<div class="galeria">${u.map((x,i)=>`<img src="${x}" class="${i===0?'sel':''}" onclick="cambiarFoto(this,'${x}')" alt="">`).join('')}</div>`:''}
+    ${u.length>1?`<div class="galeria">${u.map((x,i)=>`<img src="${x}" class="${i===0?'sel':''}" onclick="cambiarFoto(this,${i})" alt="">`).join('')}</div>`:''}
     <div class="cuerpo ficha">
       <h2>${esc(l.nombre)} ${l.favorita?'<span style="color:var(--granate)">♥</span>':''}</h2>
       <div class="dato"><span class="ico">📅</span><span><span class="et">Año:</span>${l.anio||'—'}${l.estado==='En proceso'?' <i class="pin proceso">En proceso</i>':''}</span></div>
@@ -756,8 +778,9 @@ async function abrirFicha(id){
     </div>`;
   irA('ficha');
 }
-function cambiarFoto(el,src){
-  document.getElementById('foto-principal').src = src;
+function cambiarFoto(el,i){
+  fotoActual = i;
+  document.getElementById('foto-principal').src = fichaUrls[i];
   document.querySelectorAll('.galeria img').forEach(i=>i.classList.remove('sel'));
   el.classList.add('sel');
 }
@@ -766,6 +789,145 @@ async function alternarFavorita(id){
   await pedir(tx('labores','readwrite').put(l));
   abrirFicha(id);
 }
+
+/* ---------- visor de fotos (ampliar con dos dedos) ---------- */
+let fichaUrls = [], fotoActual = 0;
+const V = {i:0, s:1, x:0, y:0, toques:null, ultimoToque:0, ultimoPunto:null, movido:false, swipeX:0, swipeY:0};
+const visorEl = ()=>document.getElementById('visor');
+const visorImg = ()=>document.getElementById('visor-img');
+function abrirVisor(i){
+  if(!fichaUrls.length) return;
+  V.i = i||0;
+  ponerFotoVisor(false);
+  visorEl().classList.add('ver');
+  const p = document.getElementById('visor-pista');
+  p.style.opacity = 1; clearTimeout(p._t); p._t = setTimeout(()=>p.style.opacity=0, 3500);
+}
+function cerrarVisor(){
+  visorEl().classList.remove('ver');
+  if(V.i!==fotoActual){
+    const mini = document.querySelectorAll('.galeria img')[V.i];
+    if(mini) cambiarFoto(mini, V.i);
+  }
+}
+function ponerFotoVisor(animar){
+  const img = visorImg();
+  img.src = fichaUrls[V.i];
+  V.s = 1; V.x = 0; V.y = 0; aplicar(animar);
+  document.getElementById('visor-contador').textContent = fichaUrls.length>1 ? (V.i+1)+' de '+fichaUrls.length : '';
+  document.querySelectorAll('.visor .flecha-v').forEach(b=>b.hidden = fichaUrls.length<2);
+}
+function pasarFoto(d){
+  if(fichaUrls.length<2) return;
+  V.i = (V.i + d + fichaUrls.length) % fichaUrls.length;
+  ponerFotoVisor(false);
+}
+function aplicar(animar){
+  const img = visorImg();
+  img.classList.toggle('anim', !!animar);
+  img.style.transform = `translate(${V.x}px,${V.y}px) scale(${V.s})`;
+}
+function limites(){
+  // tamaño real de la foto en pantalla (object-fit: contain)
+  const img = visorImg(), W = innerWidth, H = innerHeight;
+  const r = (img.naturalWidth||1)/(img.naturalHeight||1);
+  let w = W, h = W/r; if(h>H){ h = H; w = H*r; }
+  return {mx:Math.max(0,(w*V.s-W)/2), my:Math.max(0,(h*V.s-H)/2)};
+}
+function encajar(){
+  if(V.s<1) V.s = 1;
+  if(V.s>5) V.s = 5;
+  const {mx,my} = limites();
+  V.x = Math.min(mx,Math.max(-mx,V.x));
+  V.y = Math.min(my,Math.max(-my,V.y));
+}
+const centro = t => ({x:t.clientX-innerWidth/2, y:t.clientY-innerHeight/2});
+const dist = (a,b)=> Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+const medio = (a,b)=> ({x:(a.clientX+b.clientX)/2-innerWidth/2, y:(a.clientY+b.clientY)/2-innerHeight/2});
+function zoomEn(punto, nuevaEscala){
+  // mantiene fijo el punto tocado mientras se amplía
+  const qx = (punto.x - V.x)/V.s, qy = (punto.y - V.y)/V.s;
+  V.s = nuevaEscala;
+  V.x = punto.x - V.s*qx; V.y = punto.y - V.s*qy;
+}
+function alTocar(e){
+  if(e.target.closest('button')) return;
+  e.preventDefault();
+  const t = e.touches;
+  if(t.length===2){
+    V.toques = {modo:'pinza', d0:dist(t[0],t[1]), m0:medio(t[0],t[1]), s0:V.s, x0:V.x, y0:V.y};
+  }else if(t.length===1){
+    V.toques = {modo:'uno', p0:{x:t[0].clientX,y:t[0].clientY}, x0:V.x, y0:V.y};
+    V.movido = false;
+  }
+}
+function alMover(e){
+  if(!V.toques) return;
+  e.preventDefault();
+  const t = e.touches;
+  if(V.toques.modo==='pinza' && t.length===2){
+    const k = V.toques, m = medio(t[0],t[1]);
+    let s = k.s0 * dist(t[0],t[1]) / k.d0;
+    s = Math.max(0.7, Math.min(6, s));
+    const qx = (k.m0.x - k.x0)/k.s0, qy = (k.m0.y - k.y0)/k.s0;
+    V.s = s; V.x = m.x - s*qx; V.y = m.y - s*qy;
+    aplicar(false);
+  }else if(V.toques.modo==='uno' && t.length===1){
+    const k = V.toques, dx = t[0].clientX-k.p0.x, dy = t[0].clientY-k.p0.y;
+    if(Math.abs(dx)>8 || Math.abs(dy)>8) V.movido = true;
+    if(V.s>1.01){ V.x = k.x0+dx; V.y = k.y0+dy; }
+    else { V.x = dx; V.y = Math.abs(dy)>Math.abs(dx) && dy>0 ? dy : 0; }
+    V.swipeX = dx; V.swipeY = dy;
+    aplicar(false);
+  }
+}
+function alSoltar(e){
+  if(!V.toques) return;
+  const k = V.toques;
+  if(e.touches.length===1 && k.modo==='pinza'){
+    // queda un dedo: seguir moviendo la foto ampliada
+    V.toques = {modo:'uno', p0:{x:e.touches[0].clientX,y:e.touches[0].clientY}, x0:V.x, y0:V.y};
+    V.movido = true; return;
+  }
+  if(e.touches.length) return;
+  V.toques = null;
+  if(k.modo==='uno' && V.s<=1.01){
+    if(V.movido && Math.abs(V.swipeX)>60 && Math.abs(V.swipeX)>Math.abs(V.swipeY)){ pasarFoto(V.swipeX<0?1:-1); return; }
+    if(V.movido && V.swipeY>110 && V.swipeY>Math.abs(V.swipeX)){ cerrarVisor(); return; }
+  }
+  if(k.modo==='uno' && !V.movido){
+    const ahora = Date.now(), p = e.changedTouches[0];
+    const punto = centro(p);
+    if(ahora - V.ultimoToque < 320){
+      if(V.s>1.01){ V.s=1; V.x=0; V.y=0; } else { zoomEn(punto, 2.5); }
+      V.ultimoToque = 0; encajar(); aplicar(true); return;
+    }
+    V.ultimoToque = ahora;
+  }
+  encajar(); aplicar(true);
+}
+function alRueda(e){
+  // para probar en el ordenador: rueda del ratón = ampliar
+  e.preventDefault();
+  zoomEn(centro(e), Math.max(1, Math.min(5, V.s * (e.deltaY<0?1.15:1/1.15))));
+  encajar(); aplicar(false);
+}
+(function(){
+  const v = document.getElementById('visor');
+  v.addEventListener('touchstart', alTocar, {passive:false});
+  v.addEventListener('touchmove', alMover, {passive:false});
+  v.addEventListener('touchend', alSoltar, {passive:false});
+  v.addEventListener('touchcancel', alSoltar, {passive:false});
+  v.addEventListener('wheel', alRueda, {passive:false});
+  v.addEventListener('dblclick', e=>{ if(e.target.closest('button')) return; if(V.s>1.01){V.s=1;V.x=0;V.y=0;} else zoomEn(centro(e),2.5); encajar(); aplicar(true); });
+  ['gesturestart','gesturechange'].forEach(n=>v.addEventListener(n, e=>e.preventDefault()));
+  document.addEventListener('keydown', e=>{
+    if(!v.classList.contains('ver')) return;
+    if(e.key==='Escape') cerrarVisor();
+    if(e.key==='ArrowRight') pasarFoto(1);
+    if(e.key==='ArrowLeft') pasarFoto(-1);
+  });
+})();
 
 /* ---------- buscar ---------- */
 function prepararBuscar(){
