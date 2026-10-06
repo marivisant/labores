@@ -391,7 +391,7 @@ nav.abajo button.on{color:var(--granate);font-weight:600}
     <button class="opcion" onclick="editarLista('personas','Personas')"><span class="ico">👥</span><span><b>Personas</b><span id="v-personas">Para quién haces tus labores</span></span></button>
     <button class="opcion" onclick="irA('copia')"><span class="ico">💾</span><span><b>Copia de seguridad</b><span id="v-copia">Guarda tus labores a salvo</span></span></button>
     <button class="opcion" onclick="irA('ayuda')"><span class="ico">❔</span><span><b>Ayuda</b><span>Cómo usar la app</span></span></button>
-    <div class="aviso" style="margin-top:18px"><span>❤️</span><span>Las labores de Mariví · versión 1.0<br>Hecha con cariño. Tus fotos y datos se guardan solo en tu iPhone.</span></div>
+    <div class="aviso" style="margin-top:18px"><span>❤️</span><span>Las labores de Mariví · versión 1.1<br>Hecha con cariño. Tus fotos y datos se guardan solo en tu iPhone.</span></div>
   </div>
 </section>
 
@@ -407,9 +407,10 @@ nav.abajo button.on{color:var(--granate);font-weight:600}
   <div class="cuerpo">
     <p style="margin-top:0">Tus labores se guardan dentro del móvil. Guarda una copia de vez en cuando: así no se pierde nada si cambias de teléfono.</p>
     <button class="btn btn-principal" onclick="exportar()">Guardar copia de mis labores</button>
+    <button class="btn btn-verde" id="btn-enviar-copia" hidden onclick="enviarCopia()">Guardar o enviar la copia</button>
     <button class="btn btn-borde" onclick="document.getElementById('entrada-copia').click()">Restaurar una copia</button>
     <input type="file" id="entrada-copia" accept=".json,application/json" hidden onchange="importar(this)">
-    <div class="aviso"><span>💡</span><span>Al guardar la copia, elige <b>Guardar en Archivos</b> y luego súbela a iCloud o envíatela por correo.</span></div>
+    <div class="aviso"><span>💡</span><span>Al guardar la copia se abre el menú de compartir: elige <b>Guardar en Archivos</b> (iCloud Drive) o envíasela a alguien de la familia por WhatsApp o correo.</span></div>
     <p id="estado-copia" style="color:var(--tinta-suave);font-size:15px"></p>
   </div>
 </section>
@@ -933,17 +934,58 @@ function bloque(titulo,obj,ordenNum){
 
 /* ---------- copia de seguridad ---------- */
 const blobADataURL = b => new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(b)});
+let copiaPreparada = null;
 async function exportar(){
-  document.getElementById('estado-copia').textContent = 'Preparando la copia...';
+  const estado = document.getElementById('estado-copia');
+  document.getElementById('btn-enviar-copia').hidden = true;
+  estado.textContent = 'Preparando la copia...';
   const fotos = await pedir(tx('fotos').getAll());
   const datos = {app:'labores-marivi', version:1, fecha:new Date().toISOString(), config, labores,
     fotos: await Promise.all(fotos.map(async f=>({id:f.id, laborId:f.laborId, orden:f.orden||0, datos: await blobADataURL(f.blob)})))};
   const blob = new Blob([JSON.stringify(datos)],{type:'application/json'});
   const fecha = new Date().toISOString().slice(0,10);
-  descargarArchivo(new File([blob],`labores-marivi-${fecha}.json`,{type:'application/json'}));
+  copiaPreparada = {blob, nombre:`labores-marivi-${fecha}.json`, total:labores.length};
+  await enviarCopia(true);
+}
+function archivoCopia(){
+  const {blob,nombre} = copiaPreparada;
+  const json = new File([blob],nombre,{type:'application/json'});
+  if(navigator.canShare && navigator.canShare({files:[json]})) return json;
+  const txt = new File([blob],nombre,{type:'text/plain'});
+  if(navigator.canShare && navigator.canShare({files:[txt]})) return txt;
+  return null;
+}
+async function copiaHecha(){
   config.ultimaCopia = Date.now(); await guardarConfig();
-  document.getElementById('estado-copia').textContent = 'Copia creada con '+labores.length+' labores.';
+  document.getElementById('btn-enviar-copia').hidden = true;
+  document.getElementById('estado-copia').textContent = 'Copia guardada con '+copiaPreparada.total+' labores.';
   toast('Copia guardada');
+}
+async function enviarCopia(primerIntento){
+  if(!copiaPreparada) return;
+  const estado = document.getElementById('estado-copia');
+  const archivo = archivoCopia();
+  if(!archivo){
+    // sin menú de compartir (ordenador): se descarga el archivo
+    descargarArchivo(new File([copiaPreparada.blob],copiaPreparada.nombre,{type:'application/json'}));
+    return copiaHecha();
+  }
+  try{
+    await navigator.share({files:[archivo], title:'Copia de Las labores de Mariví'});
+    await copiaHecha();
+  }catch(e){
+    const btn = document.getElementById('btn-enviar-copia');
+    if(e && e.name==='AbortError'){
+      btn.hidden = false;
+      estado.textContent = 'No se ha guardado la copia. Toca el botón verde para intentarlo otra vez.';
+    }else if(primerIntento){
+      // el iPhone a veces pide un segundo toque cuando la copia tarda en prepararse
+      btn.hidden = false;
+      estado.textContent = 'La copia está lista. Toca el botón verde para guardarla.';
+    }else{
+      estado.textContent = 'No se ha podido abrir el menú de compartir.';
+    }
+  }
 }
 async function importar(input){
   const archivo = input.files[0]; input.value='';
